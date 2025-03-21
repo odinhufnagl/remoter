@@ -31,7 +31,8 @@ class RunCodeUseCase:
         os.mkdir(output_path)
         zipf.extractall(input_path)
         print(f"Extracted zip contents to: {folder_path}")
-        result = build_and_run_machine(
+
+        result = await build_and_run_machine(
             folder_path, session_id, run_code_metadata.mounts
         )
         return result

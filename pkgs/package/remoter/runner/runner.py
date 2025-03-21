@@ -14,6 +14,7 @@ import tempfile
 
 
 from remoter.api import api
+from remoter.runner.api_key import get_api_key
 from remoter.runner.local_target_folder import get_local_target_folder
 from remoter.runner.mounting import get_mount_folder_paths
 from remoter.runner.requirements_config import get_requirements
@@ -92,14 +93,17 @@ def run(func: FuncType, *args: Any, **kwargs: Any) -> Any:
 
     requirements = get_requirements()
     mount_folder_paths = get_mount_folder_paths()
-    print("mount_folder_paths", mount_folder_paths)
+    api_key = get_api_key()
+    if not api_key:
+        print("Must set API key")
+        return
     sys_paths = filter_sys_path()
     zipped_server_data = package_server_data(
         wrapped_func, sys_paths, requirements, mount_folder_paths
     )
-    print("huhuhuh")
-    response = api.run_code(zipped_server_data, mount_folder_paths)
-    print("babab")
+
+    response = api.run_code(zipped_server_data, mount_folder_paths, api_key)
+
     if response.is_failure():
         raise response.error.exc()
     res = response.get_value()

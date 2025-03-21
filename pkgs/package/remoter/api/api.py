@@ -1,3 +1,4 @@
+from email import header
 import io
 import json
 import zipfile
@@ -11,11 +12,17 @@ SERVER_URL = "http://localhost:8000/api/v1"
 
 
 def run_code(
-    zip_file: bytes, mounts: list[tuple[str, str | None]]
+    zip_file: bytes, mounts: list[tuple[str, str | None]], api_key: str
 ) -> Result[RunCodeResponse]:
     files = {"file": ("data.zip", zip_file, "application/zip")}
     data = {"mounts": json.dumps(mounts)}
-    response = requests.post(SERVER_URL + "/runner/run_code", files=files, data=data)
+    response = requests.post(
+        SERVER_URL + "/runner/run_code",
+        files=files,
+        data=data,
+        headers={"X-API-KEY": api_key},
+    )
+
     if response.status_code != 200:
         return Result.fail(DefaultResultErrors.unknown_error())
     response_data = response.json()

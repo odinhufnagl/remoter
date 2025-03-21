@@ -16,6 +16,11 @@ from app.runner.dependencies import (
 from app.runner.dto.run_code_metadata import RunCodeMetadataDto
 from app.runner.serializers.machine_run_serializer import MachineRunSerializer
 from app.runner.use_cases.run_code_use_case import RunCodeUseCase
+from app.shared.core.auth import UserInfo
+from app.shared.core.dependencies.auth import (
+    get_current_user,
+    get_current_user_with_api_key_or_token,
+)
 from app.users.dependencies import get_user_service
 from app.users.serializers.user_serializer import UserSerializer
 from app.users.services.user_service import UserService
@@ -32,10 +37,9 @@ async def run_code(
     output_file_storage_service: OutputFileStorageService = Depends(
         get_output_file_storage_service
     ),
+    user_info: UserInfo = Depends(get_current_user_with_api_key_or_token),
 ):
-    print("hellow rodl")
 
-    print("mounts", mounts)
     zip_contents = await file.read()
 
     with zipfile.ZipFile(io.BytesIO(zip_contents)) as zf:
@@ -65,6 +69,7 @@ async def run_code_download_output(
     output_file_storage_service: OutputFileStorageService = Depends(
         get_output_file_storage_service
     ),
+    user_info: UserInfo = Depends(get_current_user_with_api_key_or_token),
 ):
     try:
 
@@ -75,3 +80,8 @@ async def run_code_download_output(
         )
     except Exception as e:
         print("error", e)
+
+
+@router.get("/runs", tags=["runner"])
+async def get_runs(user_info: UserInfo = Depends(get_current_user)):
+    pass

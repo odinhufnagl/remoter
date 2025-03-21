@@ -7,8 +7,8 @@ import {
 } from "react-router-dom";
 import React from "react";
 
-import { Dashboard } from "./pages/app/dashboard/Dashboard.page";
-import { Settings } from "./pages/app/settings/Settings.page";
+import { DashboardPage } from "./pages/app/dashboard/Dashboard.page";
+import { SettingsPage } from "./pages/app/settings/Settings.page";
 import { Signup } from "./pages/auth/signup/Signup.page";
 import { Login } from "./pages/auth/login/Login.page";
 
@@ -82,8 +82,8 @@ export const Routing = () => {
             }
           >
             <Route index element={<Navigate to="/app/dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="settings" element={<Settings />} />
+            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="settings" element={<SettingsPage />} />
             <Route
               path="*"
               element={<Navigate to="/app/dashboard" replace />}

@@ -89,7 +89,6 @@ def build_and_run_docker_file(
     session_path = tmp_path
     os.makedirs(os.path.join(session_path, "machine_dir"), exist_ok=True)
     requirements_path = os.path.join(tmp_path, "input", "requirements.txt")
-    print("huhuyhuyh", os.listdir(os.path.join(tmp_path, "input", "mounted_data")))
     shutil.copy(requirements_path, build_context)
     try:
         subprocess.run(docker_cmd_build_image(image_name, build_context))
@@ -98,14 +97,12 @@ def build_and_run_docker_file(
             MachineErrors.build_error()
         )
     try:
-        print("listdir", os.listdir(session_path))
+        # publish event that machine is now running
         run_result = subprocess.run(
             docker_cmd_run_container(image_name, session_path),
             capture_output=True,
             text=True,
         )
-        print("heyyy", run_result)
-        print("responseeee", os.listdir(os.path.join(tmp_path, "output")))
     except:
         return Result[MachineRunResponse, MachineError].fail(MachineErrors.run_error())
     subprocess.run(docker_cmd_rm_image(image_name), check=True)
@@ -136,12 +133,19 @@ def build_and_run_docker_file(
     return Result[MachineRunResponse, MachineError].ok(response)
 
 
-def build_and_run_machine(
+async def build_and_run_machine(
     tmp_path, session_id, mounts: list[tuple[str, str | None]]
 ) -> Result[MachineRunResponse]:
     build_context = MACHINE_PATH
-    print("buuuuu", build_context)
     image_name = f"machine.{session_id}"
-    return build_and_run_docker_file(
+    # publish event that machine is being built (event-handler will update the db)
+    docker_result = build_and_run_docker_file(
         image_name, tmp_path, build_context, mounts, session_id
     )
+    if docker_result.is_failure():
+        # publish event that machine is error
+        return docker_result
+    if docker_result.get_value().is_error:
+        # publish event that machine is error
+        return docker_result
+    return docker_result

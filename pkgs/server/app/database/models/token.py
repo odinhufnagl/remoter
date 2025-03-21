@@ -1,6 +1,6 @@
 import re
 from wsgiref import validate
-from sqlalchemy import String
+from sqlalchemy import ForeignKey, String
 from app.database.database import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column
 import uuid
@@ -10,16 +10,12 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class TokenModel(BaseModel):
-    __tablename__ = "refresh_token"
-    id: Mapped[str] = mapped_column(
-        String,
-        primary_key=True,
-        default=lambda *args, **kwargs: str(uuid.uuid4()),
-    )
+    __tablename__ = "refresh_tokens"
+
     user_id: Mapped[str] = mapped_column(
         String,
+        ForeignKey("users.id"),
         unique=True,
-        default=lambda *args, **kwargs: str(uuid.uuid4()),
         index=True,
     )
     token_hash: Mapped[str] = mapped_column(String, nullable=False)

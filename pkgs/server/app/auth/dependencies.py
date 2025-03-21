@@ -1,6 +1,8 @@
 from fastapi import Depends
+from app.auth.repos.api_key_repository import ApiKeyRepository
 from app.auth.repos.token_repository import TokenRepository
 from app.auth.services.access_token_service import AccessTokenService
+from app.auth.services.api_key_service import ApiKeyService
 from app.auth.services.auth_service import AuthService
 from app.auth.services.refresh_token_service import RefreshTokenService
 from app.database.dependencies import get_db_session
@@ -21,6 +23,18 @@ def get_token_repository(
     db_session: AsyncSession = Depends(get_db_session),
 ) -> TokenRepository:
     return TokenRepository(db_session)
+
+
+def get_api_key_repository(
+    db_session: AsyncSession = Depends(get_db_session),
+) -> ApiKeyRepository:
+    return ApiKeyRepository(db_session)
+
+
+def get_api_key_service(
+    api_key_repository: ApiKeyRepository = Depends(get_api_key_repository),
+) -> ApiKeyService:
+    return ApiKeyService(api_key_repository=api_key_repository)
 
 
 def get_auth_service(

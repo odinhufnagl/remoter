@@ -5,6 +5,7 @@ from .runner import (
     ResponseCollector,
     set_local_target_folder,
     upload_folder,
+    set_api_key,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "ResponseCollector",
     "set_local_target_folder",
     "upload_folder",
+    "set_api_key",
 ]

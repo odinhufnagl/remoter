@@ -43,7 +43,7 @@ class TokenRepository(PostgresRepository):
 
     async def get_and_verify_refresh_token(
         self, user_id: str, refresh_token: str
-    ) -> Result[str]:
+    ) -> Result[bool]:
         try:
             db_token = (
                 await self.db.execute(

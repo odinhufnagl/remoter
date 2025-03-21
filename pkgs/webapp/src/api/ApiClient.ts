@@ -13,7 +13,14 @@ import { UnknownError } from "@/core/errors/defaultErrors";
 import { TokenCredentials, TokenCredentialsResponseBody } from "./auth/types";
 import { Config } from "@/config";
 import { tokenCredentialsParser } from "./auth/parsers";
-import { authService, AuthService } from "@/services/AuthService";
+import {
+  refreshTokenService,
+  RefreshTokenService,
+} from "@/services/RefreshTokenService";
+import {
+  accessTokenService,
+  AccessTokenService,
+} from "@/services/AccessTokenService";
 
 export const axiosInstance = axios.create({
   baseURL: Config.apiUrl,
@@ -24,7 +31,8 @@ export default class ApiClient {
 
   constructor(
     private readonly client: AxiosInstance,
-    private readonly authService: AuthService
+    private readonly accessTokenService: AccessTokenService,
+    private readonly refreshTokenService: RefreshTokenService
   ) {}
 
   public async refreshAccessToken(
@@ -45,10 +53,15 @@ export default class ApiClient {
     return tokenCredentialsParser(response.data);
   }
 
+  private saveCredentials(credentials: TokenCredentials) {
+    this.accessTokenService.save(credentials.accessToken);
+    this.refreshTokenService.save(credentials.refreshToken);
+  }
+
   public async refresh(): Promise<boolean> {
-    const refreshToken = this.authService.refreshToken();
+    const refreshToken = this.refreshTokenService.get();
     const credentials = await this.refreshAccessToken(refreshToken || "");
-    this.authService.saveCredentials(credentials);
+    this.saveCredentials(credentials);
     return true;
   }
 
@@ -99,7 +112,7 @@ export default class ApiClient {
   }): Promise<Result<ApiSuccess<R>, ApiError | UnknownError>> {
     const isAuthRoute = this.isAuthRoute(path);
 
-    const accessToken = this.authService.accessToken();
+    const accessToken = this.accessTokenService.get();
     //const refreshToken = this.storeRegistry.store.getState().auth.refreshToken;
     //const accessToken = this.storeRegistry.store.getState().auth.accessToken;
 
@@ -201,4 +214,8 @@ export default class ApiClient {
   };
 }
 
-export const apiClient = new ApiClient(axiosInstance, authService);
+export const apiClient = new ApiClient(
+  axiosInstance,
+  accessTokenService,
+  refreshTokenService
+);

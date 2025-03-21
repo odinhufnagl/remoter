@@ -17,3 +17,7 @@ export type TokenCredentialsResponseBody = {
   access_token: string;
   refresh_token: string;
 };
+
+export type ApiKeyResponseBody = {
+  api_key: string;
+};

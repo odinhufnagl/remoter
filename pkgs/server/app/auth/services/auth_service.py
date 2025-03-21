@@ -64,7 +64,6 @@ class AuthService:
         user_result = await self.user_repository.get_by_email_and_password(
             email, password, db_session
         )
-        print("user_result", user_result)
         if user_result.is_failure():
             if not session_incoming:
                 await db_session.rollback()
@@ -148,7 +147,6 @@ class AuthService:
 
     async def logout(self, user_id: str) -> Result[None]:
         result = await self.token_repository.delete_refresh_token(user_id)
-        print("babab", result)
         if result.is_failure():
             return Result.fail(result.error)
         return Result.ok(None)

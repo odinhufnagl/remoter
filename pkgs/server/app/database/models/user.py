@@ -17,12 +17,6 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class UserModel(BaseModel):
     __tablename__ = "users"
 
-    id: Mapped[str] = mapped_column(
-        String,
-        primary_key=True,
-        default=lambda *args, **kwargs: str(uuid.uuid4()),
-        index=True,
-    )
     email: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
     password_hash: Mapped[str] = mapped_column(String, nullable=False)
 

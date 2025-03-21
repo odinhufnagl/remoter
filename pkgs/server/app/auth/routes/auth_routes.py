@@ -1,16 +1,19 @@
 import re
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
-from app.auth.dependencies import get_auth_service
+from app.auth.dependencies import get_api_key_service, get_auth_service
 from app.auth.errors.auth_errors import AuthError, AuthErrors
 from app.auth.schemas.schemas import (
     RequestBodyLogin,
     RequestBodyRefreshToken,
     RequestBodySignup,
 )
+from app.auth.serializers.api_key_serializer import ApiKeySerializer
 from app.auth.serializers.auth_credentials_serializer import AuthCredentialsSerializer
 from app.auth.services import auth_service
+from app.auth.services.api_key_service import ApiKeyService
 from app.auth.services.auth_service import AuthService
+from app.database.models import api_key
 from app.database.models.user import UserModel
 from app.shared.core.auth import UserInfo
 from app.database.dependencies import get_db_session
@@ -31,7 +34,6 @@ async def login(
 ):
     try:
         result = await auth_service.login(email=body.email, password=body.password)
-        print("rrrrrr", result)
         if result.is_failure():
             raise result.error.exc()
         creds = result.get_value()
@@ -51,7 +53,6 @@ async def signup(
 ):
 
     result = await auth_service.signup(email=body.email, password=body.password)
-    print("rhahaha", result)
     if result.is_failure():
         raise result.error.exc()
 
@@ -67,15 +68,11 @@ async def logout(
     user_info: UserInfo = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
 ):
-    try:
-        print("heyy??")
-        result = await auth_service.logout(user_info.user_id)
-        print("wuttt", result)
-        if result.is_failure():
-            raise result.error.exc()
-        return
-    except Exception as e:
-        print("heyy", e)
+
+    result = await auth_service.logout(user_info.user_id)
+    if result.is_failure():
+        raise result.error.exc()
+    return
 
 
 @router.post("/refresh", tags=["auth"])
@@ -102,3 +99,15 @@ async def self(
         raise user_result.error.exc()
     user = user_result.get_value()
     return UserSerializer.serialize(user)
+
+
+@router.post("/api-key", tags=["auth"])
+async def post_api_key(
+    user_info: UserInfo = Depends(get_current_user),
+    api_key_service: ApiKeyService = Depends(get_api_key_service),
+):
+    result = await api_key_service.create_api_key(user_info.user_id)
+    print("rrrhah", result)
+    if result.is_failure():
+        raise result.error.exc()
+    return ApiKeySerializer(api_key=result.get_value())

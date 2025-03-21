@@ -11,6 +11,8 @@ import { authService } from "@/services/AuthService";
 import { Config } from "@/config";
 import { ApiError } from "./types";
 import { LocalStorageMock } from "@/core/tests/LocalStorageMock";
+import { accessTokenService } from "@/services/AccessTokenService";
+import { refreshTokenService } from "@/services/RefreshTokenService";
 
 global.localStorage = new LocalStorageMock();
 
@@ -46,7 +48,11 @@ describe("ApiClient", () => {
   let mockSaveCredentials: jest.SpiedFunction<
     typeof authService.saveCredentials
   >;
-  const apiClient = new ApiClient(axiosInstance, authService);
+  const apiClient = new ApiClient(
+    axiosInstance,
+    accessTokenService,
+    refreshTokenService
+  );
   const defaultAccessToken = "accessTokenDefault";
   const defaultRefreshToken = "refreshTokenDefault";
   const defaultErrorBody = {

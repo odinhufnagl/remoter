@@ -43,12 +43,13 @@ def main():
     os.chdir("./fake_run")
     log_stream = io.StringIO()
     with redirect_stdout(log_stream), redirect_stderr(log_stream):
-        func_result = func()  # Execute the function; logs will be captured.
+        func_result = func()
 
-    # Retrieve the captured logs.
+    # store logs temporary in redis
+
     logs = log_stream.getvalue()
     print(logs)
-    # extract_function_result_to_output(func_result, output_path)
+
     with open(func_result_value_path, "wb") as f:
         cloudpickle.dump(func_result, f)
 
